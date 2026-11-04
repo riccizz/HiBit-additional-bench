@@ -1,0 +1,10 @@
+[
+  {"key": "sign_cafe",      "prompt": "A small corner cafe at dusk with a hand-painted wooden sign above the door that reads \"MORNING TIDE\", warm light spilling onto a wet cobblestone street"},
+  {"key": "poster_title",   "prompt": "A minimalist concert poster with the bold headline \"SUMMER ECHOES 2026\" in white sans-serif letters over a gradient from deep blue to orange"},
+  {"key": "spatial_cubes",  "prompt": "A blue cube on the left, a yellow sphere in the middle and a green cone on the right, all resting on a plain white floor"},
+  {"key": "count_birds",    "prompt": "Four sparrows sitting in a row on a thin wire against a pale grey sky"},
+  {"key": "attr_binding",   "prompt": "A girl in a red raincoat holding a purple umbrella next to a boy in a yellow raincoat holding a black umbrella"},
+  {"key": "macro_insect",   "prompt": "Macro photograph of a dragonfly resting on a dew-covered blade of grass, shallow depth of field, early morning light"},
+  {"key": "city_aerial",    "prompt": "Aerial view of a dense harbor city at golden hour, container ships in the bay, long shadows across the rooftops"},
+  {"key": "still_life",     "prompt": "An oil painting of a ceramic teapot, two lemons and a folded linen napkin on a dark wooden table, chiaroscuro lighting"}
+]

@@ -1,0 +1,6 @@
+# per-model envs (.venv may be a symlink), vendored upstream repos, offload dirs, outputs
+*/.venv
+*/*/
+results/
+__pycache__/
+*.pyc
