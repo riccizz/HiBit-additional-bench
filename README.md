@@ -12,8 +12,8 @@ and `prompts.json` (8 test prompts).
 
 ## Reference numbers
 
-The first row is HiBit-3B as reported in the current paper draft; later checkpoints only
-improve on it. For baselines, a metric is filled only where a reported number was found and
+The first two rows are HiBit-1B and HiBit-3B as reported in the current paper draft; later
+checkpoints only improve on them. For baselines, a metric is filled only where a reported number was found and
 cross-checked. Missing, conflicting or unverified numbers are left blank. PRISM is blank for
 every baseline because published PRISM scores use a GPT-4.1 judge, while HiBit's uses a
 different judge, so baselines must be re-scored with our pipeline.
@@ -23,12 +23,14 @@ tokenizer). Baseline sizes are the totals measured by `param_groups()` here, inc
 encoders and decoders. Use one counting rule before quoting sizes in the paper.
 
 Row order: HiBit's own family (masked diffusion) first, then continuous diffusion, then AR.
-Within each family, larger models come first, so each row shows a model several times
-HiBit's size that does not beat it on any filled metric.
+Within each family, larger models come first. Where a baseline beats HiBit on a filled
+metric: Z-Image (88.14) and SenseNova-U1.5 (88.11) are above HiBit-1B on DPG, and GLM-Image
+(0.9116 CVTG-2K) is above both HiBit models on CVTG-2K.
 
 | model | family | size | GenEval | DPG | CVTG-2K | LongText | PRISM | notes |
 |---|---|---|---|---|---|---|---|---|
-| **HiBit-3B (ours)** | masked diffusion | 3.06B | 0.942 | 88.38 | | 0.959 | 79.2 | Best per metric over NFE settings at 512px (paper Table 1). Lower bound: newer checkpoints only improve. CVTG-2K is not in the paper yet. |
+| **HiBit-1B (ours)** | masked diffusion | 1.00B | | 87.55 | 0.8906 | 0.944 | 78.2 | Current paper Table 1 row (best per metric over NFE settings). Lower bound: newer checkpoints only improve. |
+| **HiBit-3B (ours)** | masked diffusion | 3.06B | 0.944 | 88.09 | 0.9008 | 0.969 | 79.8 | From the paper draft (currently commented out of Table 1). |
 | Lumina-DiMOO | masked diffusion | 8.2B | 0.88 | 86.04 | 0.590 | | | Closest family to HiBit. 1024², 64 steps, CFG 4.0. ML-Cache (the official speed-up) is **off**; decide whether to enable it for speed comparisons. GenEval 0.88 is the base model; the Self-GRPO variant reports 0.91. CVTG-2K is measured by third parties (InternVL-U, LLaDA-Image); DiMOO does not report it. |
 | SenseNova-U1.5 | continuous diffusion | 17.5B (two full experts/layer, ~8.2B per path) | 0.92 | 88.11 | | | | Pixel-space flow matching, no VAE. The default **2048²** is ~4× the pixels of the others; consider 1024² for fair timing. Defaults to the `-Preview` weights; set `SENSENOVA_REPO=sensenova/SenseNova-U1.5-8B-MoT` for the official release. CVTG-2K sources conflict: 0.948 attributed to its own report vs 0.887 for the Preview weights in LLaDA-Image, so re-measure. |
 | BAGEL | continuous diffusion | 14.3B (7B active) | 0.82 | 85.07 | 0.356 | 0.373 | | Rectified flow inside the LLM. Settings follow the repo's GenEval script (CFG interval [0,1]); the demo notebook uses [0.4,1]. The reported 0.88 GenEval uses "think"/rewriting; 0.82 is without. Loads with a 40GiB `max_memory` cap. VAE decode is forced to fp32 (upstream dtype bug under autocast). CVTG-2K is measured by third parties (InternVL-U, LLaDA-Image). |
