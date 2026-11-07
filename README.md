@@ -26,23 +26,28 @@ Row order: HiBit's own family (masked diffusion) first, then continuous diffusio
 Within each family, larger models come first, so each row shows a model several times
 HiBit's size that does not beat it on any filled metric.
 
-| model | family | size | GenEval | DPG | LongText | PRISM | notes |
-|---|---|---|---|---|---|---|---|
-| **HiBit-3B (ours)** | masked diffusion | 3.06B | 0.942 | 88.38 | 0.959 | 79.2 | Best per metric over NFE settings at 512px (paper Table 1). Lower bound: newer checkpoints only improve. |
-| Lumina-DiMOO | masked diffusion | 8.2B | 0.88 | 86.04 | | | Closest family to HiBit. 1024², 64 steps, CFG 4.0. ML-Cache (the official speed-up) is **off**; decide whether to enable it for speed comparisons. GenEval 0.88 is the base model; the Self-GRPO variant reports 0.91. |
-| SenseNova-U1.5 | continuous diffusion | 17.5B (two full experts/layer, ~8.2B per path) | 0.92 | 88.11 | | | Pixel-space flow matching, no VAE. The default **2048²** is ~4× the pixels of the others; consider 1024² for fair timing. Defaults to the `-Preview` weights; set `SENSENOVA_REPO=sensenova/SenseNova-U1.5-8B-MoT` for the official release. |
-| BAGEL | continuous diffusion | 14.3B (7B active) | 0.82 | 85.07 | 0.373 | | Rectified flow inside the LLM. Settings follow the repo's GenEval script (CFG interval [0,1]); the demo notebook uses [0.4,1]. The reported 0.88 GenEval uses "think"/rewriting; 0.82 is without. Loads with a 40GiB `max_memory` cap. VAE decode is forced to fp32 (upstream dtype bug under autocast). |
-| Z-Image | continuous diffusion | 10.3B (6.2B DiT + 4.0B Qwen3 encoder) | 0.84 | 88.14 | 0.935 | | 1024², 50 steps, CFG 4.0, per the model card. Owns the venv that `z_image_turbo` and `glm_image` symlink to (diffusers pinned to a git commit). Base sometimes garbles text; Turbo looks cleaner. |
-| Z-Image-Turbo | continuous diffusion | 10.3B | 0.82 | 84.86 | 0.917 | | **Step-distilled** (8 DiT forwards, no CFG), so mark it † in the paper. With only 8 forwards it is the main threat to the speed frontier. Shares `z_image`'s venv. |
-| X-Omni | AR | **27.8B** (9.6B LM + ~12B FLUX-sized decoder + 4.9B FLUX text encoders + 1.4B VAE/VQ), i.e. **above 20B** | | | | | **Needs an HF token** with the FLUX.1-dev license accepted (the decoder uses its text encoders + VAE). 1152², 5184 AR tokens + 28 decoder steps: by far the slowest model here. `XOMNI_OFFLOAD=auto` keeps it on GPU when >50GB is free (B200); offloaded latencies are meaningless. |
-| GLM-Image | AR | 17.7B (9B AR + 7B DiT decoder) | | | | | AR prior (1281 tokens) runs inside the diffusers pipeline. The adapter wraps it so its time counts as backbone, not text encode. Peak VRAM 40.5GB. Reported DPG (84.78 vs 81.01) and LongText (0.952 vs 0.966) conflict across sources, so re-measure. Strongest text rendering in the set. |
-| STAR-7B | AR | 17.5B (incl. 2.6B Gemma2 encoder + 1.1B decoders) | | | | | 576 VQ tokens (384px) + 40 Lumina2 DiT steps (1024²). Decoder settings are hard-coded upstream. Also downloads Qwen2.5-VL-7B and Lumina-Image-2.0. The model card's 0.91 / 87.44 do not say whether they are 3B or 7B. Weak text rendering. |
-| OneCAT-3B | AR | 9.6B (3B active) | | 84.53 | | | Next-scale AR, 13 scales, CFG 20. Eager attention (no flash-attn), transformers 4.37.2. A reported GenEval 0.90 was not verified against the paper. Weak text rendering. |
+| model | family | size | GenEval | DPG | CVTG-2K | LongText | PRISM | notes |
+|---|---|---|---|---|---|---|---|---|
+| **HiBit-3B (ours)** | masked diffusion | 3.06B | 0.942 | 88.38 | | 0.959 | 79.2 | Best per metric over NFE settings at 512px (paper Table 1). Lower bound: newer checkpoints only improve. CVTG-2K is not in the paper yet. |
+| Lumina-DiMOO | masked diffusion | 8.2B | 0.88 | 86.04 | 0.590 | | | Closest family to HiBit. 1024², 64 steps, CFG 4.0. ML-Cache (the official speed-up) is **off**; decide whether to enable it for speed comparisons. GenEval 0.88 is the base model; the Self-GRPO variant reports 0.91. CVTG-2K is measured by third parties (InternVL-U, LLaDA-Image); DiMOO does not report it. |
+| SenseNova-U1.5 | continuous diffusion | 17.5B (two full experts/layer, ~8.2B per path) | 0.92 | 88.11 | | | | Pixel-space flow matching, no VAE. The default **2048²** is ~4× the pixels of the others; consider 1024² for fair timing. Defaults to the `-Preview` weights; set `SENSENOVA_REPO=sensenova/SenseNova-U1.5-8B-MoT` for the official release. CVTG-2K sources conflict: 0.948 attributed to its own report vs 0.887 for the Preview weights in LLaDA-Image, so re-measure. |
+| BAGEL | continuous diffusion | 14.3B (7B active) | 0.82 | 85.07 | 0.356 | 0.373 | | Rectified flow inside the LLM. Settings follow the repo's GenEval script (CFG interval [0,1]); the demo notebook uses [0.4,1]. The reported 0.88 GenEval uses "think"/rewriting; 0.82 is without. Loads with a 40GiB `max_memory` cap. VAE decode is forced to fp32 (upstream dtype bug under autocast). CVTG-2K is measured by third parties (InternVL-U, LLaDA-Image). |
+| Z-Image | continuous diffusion | 10.3B (6.2B DiT + 4.0B Qwen3 encoder) | 0.84 | 88.14 | 0.8671 | 0.935 | | 1024², 50 steps, CFG 4.0, per the model card. Owns the venv that `z_image_turbo` and `glm_image` symlink to (diffusers pinned to a git commit). Base sometimes garbles text; Turbo looks cleaner. |
+| Z-Image-Turbo | continuous diffusion | 10.3B | 0.82 | 84.86 | 0.8585 | 0.917 | | **Step-distilled** (8 DiT forwards, no CFG), so mark it † in the paper. With only 8 forwards it is the main threat to the speed frontier. Shares `z_image`'s venv. |
+| X-Omni | AR | **27.8B** (9.6B LM + ~12B FLUX-sized decoder + 4.9B FLUX text encoders + 1.4B VAE/VQ), i.e. **above 20B** | | | | | | **Needs an HF token** with the FLUX.1-dev license accepted (the decoder uses its text encoders + VAE). 1152², 5184 AR tokens + 28 decoder steps: by far the slowest model here. `XOMNI_OFFLOAD=auto` keeps it on GPU when >50GB is free (B200); offloaded latencies are meaningless. |
+| GLM-Image | AR | 17.7B (9B AR + 7B DiT decoder) | | | 0.9116 | | | AR prior (1281 tokens) runs inside the diffusers pipeline. The adapter wraps it so its time counts as backbone, not text encode. Peak VRAM 40.5GB. Reported DPG (84.78 vs 81.01) and LongText (0.952 vs 0.966) conflict across sources, so re-measure. Strongest text rendering in the set. |
+| STAR-7B | AR | 17.5B (incl. 2.6B Gemma2 encoder + 1.1B decoders) | | | | | | 576 VQ tokens (384px) + 40 Lumina2 DiT steps (1024²). Decoder settings are hard-coded upstream. Also downloads Qwen2.5-VL-7B and Lumina-Image-2.0. The model card's 0.91 / 87.44 do not say whether they are 3B or 7B. Weak text rendering. |
+| OneCAT-3B | AR | 9.6B (3B active) | | 84.53 | | | | Next-scale AR, 13 scales, CFG 20. Eager attention (no flash-attn), transformers 4.37.2. A reported GenEval 0.90 was not verified against the paper. Weak text rendering. |
+
+CVTG-2K is the average word accuracy over 2-5 text regions, the metric reported in the
+paper's Table 1.
 
 Sources for baseline numbers: SenseNova-U1.5 report (arXiv 2609.11929); Mage-Flow comparison
 tables (arXiv 2607.19064) for Z-Image, Z-Image-Turbo and BAGEL; Lumina-DiMOO (arXiv
 2510.06308) and LLaDA-o (arXiv 2603.01068) for DiMOO; SenseNova-U1 (arXiv 2605.12500) for
-OneCAT DPG.
+OneCAT DPG. CVTG-2K: Z-Image paper Table 5 (arXiv 2511.22699) for Z-Image and Z-Image-Turbo;
+GLM-Image model card; InternVL-U Table 11 (arXiv 2603.09877) and LLaDA-Image Table 6 (arXiv
+2609.03796) for Lumina-DiMOO and BAGEL.
 
 ## Models
 
